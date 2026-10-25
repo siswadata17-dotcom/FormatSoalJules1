@@ -374,7 +374,30 @@
     </div>
 
     <div class="panel">
-      <h3>⚠️ 6. Atur Batas Pelanggaran</h3>
+      <h3>🎯 6. Pengaturan Score &amp; KKM Nilai</h3>
+      <p style="font-size:13px; margin:0 0 10px 0; color:var(--text-secondary);">Atur skala nilai maksimal, standar kelulusan (KKM), dan tampilan hasil nilai untuk siswa.</p>
+      <div class="panel-row" style="margin-bottom:10px;">
+        <label style="margin:0;">Nilai Maksimal (Skala):</label>
+        <input type="number" id="inputNilaiMaksimal" min="10" max="1000" value="100">
+        <label style="margin:0; margin-left:15px;">Nilai KKM:</label>
+        <input type="number" id="inputNilaiKKM" min="0" max="1000" value="75">
+      </div>
+      <div class="panel-row" style="margin-bottom:10px;">
+        <label style="margin:0;">Tampilkan Nilai ke Siswa:</label>
+        <select id="selectTampilNilai" style="width:auto; min-width:120px;">
+          <option value="true" selected>Ya (Tampilkan)</option>
+          <option value="false">Tidak (Sembunyikan)</option>
+        </select>
+      </div>
+      <div class="panel-row">
+        <button class="btn btn-success" onclick="simpanPengaturanNilai()" style="padding:8px 15px; font-size:13px;">💾 Simpan Pengaturan Score</button>
+        <button class="btn btn-secondary" onclick="resetPengaturanNilai()" style="padding:8px 15px; font-size:13px;">🔄 Reset Default</button>
+      </div>
+      <div id="statusPengaturanNilai"></div>
+    </div>
+
+    <div class="panel">
+      <h3>⚠️ 7. Atur Batas Pelanggaran</h3>
       <p style="font-size:13px; margin:0 0 10px 0; color:var(--text-secondary);">Tentukan jumlah maksimal pelanggaran sebelum ujian otomatis dikumpulkan.</p>
       <div class="panel-row">
         <label style="margin:0;">Batas Pelanggaran:</label>
@@ -394,7 +417,7 @@
     </div>
 
     <div class="panel panel-print">
-      <h3>🖨️ 7. Cetak &amp; Ekspor Soal Ujian</h3>
+      <h3>🖨️ 8. Cetak &amp; Ekspor Soal Ujian</h3>
       <p style="font-size:13px; margin:0 0 10px 0; color:var(--text-secondary);">Cetak atau ekspor soal ujian ke berbagai format file (PDF, Word, Excel) dengan pengaturan format sesuai kebutuhan.</p>
       <div class="panel-row" style="margin-bottom:10px;">
         <div class="form-group" style="flex:1; min-width:180px; margin-bottom:0;"><label>🔤 Jenis Font:</label>
@@ -469,7 +492,7 @@
     </div>
 
     <div class="panel">
-      <h3>📊 8. Integrasi Google Spreadsheet (Kirim Nilai Otomatis)</h3>
+      <h3>📊 9. Integrasi Google Spreadsheet (Kirim Nilai Otomatis)</h3>
       <p style="font-size:13px; margin:0 0 10px 0; color:var(--text-secondary);">Masukkan URL Web App dari Google Apps Script untuk menerima hasil ujian siswa secara otomatis ke Google Spreadsheet.</p>
       <div class="form-group">
         <label>URL Google Apps Script Web App:</label>
@@ -537,14 +560,14 @@
     </div>
 
     <div class="panel">
-      <h3>🗑️ 9. Reset Data Siswa</h3>
+      <h3>🗑️ 10. Reset Data Siswa</h3>
       <p style="font-size:13px; margin:0 0 10px 0; color:var(--text-secondary);">Hapus semua data siswa yang sedang/sudah ujian. Pengaturan guru TIDAK terhapus.</p>
       <button class="btn btn-danger" onclick="resetDataSiswa()" style="padding:8px 15px; font-size:13px;">🗑️ Reset Data Siswa</button>
       <div id="statusResetSiswa"></div>
     </div>
 
     <div class="panel panel-highlight">
-      <h3>💾 10. Simpan Permanen ke File HTML</h3>
+      <h3>💾 11. Simpan Permanen ke File HTML</h3>
       <p style="font-size:13px; margin:0 0 10px 0; color:#065f46;"><strong>Simpan semua perubahan</strong> ke dalam file HTML. File baru akan terdownload dan bisa dibagikan ke siswa.</p>
       <div class="alert-info">
         <strong>📋 Langkah-langkah:</strong>
@@ -615,9 +638,12 @@ const SOAL_DEFAULT = [{"q":"Seorang wirausahawan komputer dan informatika didefi
 // __RUNTIME_CONFIG_START__
 let configDurasi = parseInt(localStorage.getItem('configDurasi') || '30');
 let configJumlahSoal = parseInt(localStorage.getItem('configJumlahSoal') || '0');
-let configAcak = localStorage.getItem('configAcak') === 'false';
-let configAcakOpsi = localStorage.getItem('configAcakOpsi') === 'false';
+let configAcak = localStorage.getItem('configAcak') === 'true';
+let configAcakOpsi = localStorage.getItem('configAcakOpsi') === 'true';
 let configMaxPelanggaran = parseInt(localStorage.getItem('configMaxPelanggaran') || '5');
+let configNilaiMaksimal = parseInt(localStorage.getItem('configNilaiMaksimal') || '100');
+let configNilaiKKM = parseInt(localStorage.getItem('configNilaiKKM') || '75');
+let configTampilNilai = localStorage.getItem('configTampilNilai') !== 'false';
 // __RUNTIME_CONFIG_END__
 
 const UKURAN_KERTAS = {
@@ -631,7 +657,7 @@ const UKURAN_KERTAS = {
 
 const savedVersion = localStorage.getItem('htmlVersion');
 if (savedVersion !== HTML_VERSION) {
-  ['configJudul','configSubJudul','configPassword','configToken','configGoogleSheetUrl','configDurasi','configJumlahSoal','configAcak','configAcakOpsi','configMaxPelanggaran','soalAktif'].forEach(k => localStorage.removeItem(k));
+  ['configJudul','configSubJudul','configPassword','configToken','configGoogleSheetUrl','configDurasi','configJumlahSoal','configAcak','configAcakOpsi','configMaxPelanggaran','configNilaiMaksimal','configNilaiKKM','configTampilNilai','soalAktif'].forEach(k => localStorage.removeItem(k));
   localStorage.setItem('htmlVersion', HTML_VERSION);
 }
 
@@ -686,6 +712,9 @@ function loadDashboardData() {
   updatePasswordDisplay();
   document.getElementById('inputWaktu').value = configDurasi;
   document.getElementById('inputJumlahSoal').value = configJumlahSoal;
+  document.getElementById('inputNilaiMaksimal').value = configNilaiMaksimal;
+  document.getElementById('inputNilaiKKM').value = configNilaiKKM;
+  document.getElementById('selectTampilNilai').value = configTampilNilai ? "true" : "false";
   document.getElementById('inputMaxPelanggaran').value = configMaxPelanggaran;
   document.getElementById('statusWaktu').innerHTML = '<div class="alert-success">✅ Waktu: <strong>' + configDurasi + ' menit</strong> | Soal: <strong>' + (configJumlahSoal === 0 ? 'Semua' : configJumlahSoal) + '</strong></div>';
   document.getElementById('toggleAcak').checked = configAcak;
@@ -694,6 +723,47 @@ function loadDashboardData() {
   document.getElementById('jumlahSoalSaatIni').innerText = soalAktif.length;
   document.getElementById('versionBadge').innerText = 'v' + HTML_VERSION;
   document.getElementById('currentVersionDisplay').innerText = 'v' + HTML_VERSION;
+}
+
+function simpanPengaturanNilai() {
+  const maxScore = parseInt(document.getElementById('inputNilaiMaksimal').value);
+  const kkm = parseInt(document.getElementById('inputNilaiKKM').value);
+  const tampil = document.getElementById('selectTampilNilai').value === 'true';
+
+  if (isNaN(maxScore) || maxScore < 10 || maxScore > 1000) {
+    document.getElementById('statusPengaturanNilai').innerHTML = '<div class="alert-error">❌ Nilai Maksimal harus antara 10 - 1000!</div>';
+    return;
+  }
+  if (isNaN(kkm) || kkm < 0 || kkm > maxScore) {
+    document.getElementById('statusPengaturanNilai').innerHTML = '<div class="alert-error">❌ KKM tidak boleh melebihi Nilai Maksimal!</div>';
+    return;
+  }
+
+  configNilaiMaksimal = maxScore;
+  configNilaiKKM = kkm;
+  configTampilNilai = tampil;
+
+  localStorage.setItem('configNilaiMaksimal', configNilaiMaksimal);
+  localStorage.setItem('configNilaiKKM', configNilaiKKM);
+  localStorage.setItem('configTampilNilai', configTampilNilai);
+
+  document.getElementById('statusPengaturanNilai').innerHTML = '<div class="alert-success">✅ Pengaturan Score berhasil disimpan! Maksimal: <strong>' + configNilaiMaksimal + '</strong>, KKM: <strong>' + configNilaiKKM + '</strong>, Tampilkan: <strong>' + (configTampilNilai ? 'Ya' : 'Tidak') + '</strong></div>';
+}
+
+function resetPengaturanNilai() {
+  configNilaiMaksimal = 100;
+  configNilaiKKM = 75;
+  configTampilNilai = true;
+
+  localStorage.setItem('configNilaiMaksimal', 100);
+  localStorage.setItem('configNilaiKKM', 75);
+  localStorage.setItem('configTampilNilai', true);
+
+  document.getElementById('inputNilaiMaksimal').value = 100;
+  document.getElementById('inputNilaiKKM').value = 75;
+  document.getElementById('selectTampilNilai').value = "true";
+
+  document.getElementById('statusPengaturanNilai').innerHTML = '<div class="alert-success">✅ Pengaturan score direset ke default (Maksimal: 100, KKM: 75, Tampilkan: Ya).</div>';
 }
 
 function salinKodeGas() {
@@ -1087,8 +1157,9 @@ function simpanPermanenKeHTML() {
     let html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
     document.getElementById('menuAwal').style.display = savedState.menuAwal; document.getElementById('identityForm').style.display = savedState.identityForm; document.getElementById('dashboardGuru').style.display = savedState.dashboardGuru; document.getElementById('quizArea').style.display = savedState.quizArea; document.getElementById('resultArea').style.display = savedState.resultArea; document.getElementById('loginModal').style.display = savedState.loginModal; document.getElementById('resetModal').style.display = savedState.resetModal; document.getElementById('violationOverlay').style.display = savedState.violationOverlay;
     const newVersion = incrementVersion(HTML_VERSION);
+    localStorage.setItem('htmlVersion', newVersion);
     const newConfigBlock = '// __CONFIG_START__\nconst JUDUL_DEFAULT = ' + JSON.stringify(configJudul) + ';\nconst SUBJUDUL_DEFAULT = ' + JSON.stringify(configSubJudul) + ';\nconst PASSWORD_DEFAULT = ' + JSON.stringify(PASSWORD_GURU) + ';\nconst TOKEN_DEFAULT = ' + JSON.stringify(configToken) + ';\nconst GOOGLE_SHEET_URL_DEFAULT = ' + JSON.stringify(configGoogleSheetUrl) + ';\nconst SOAL_DEFAULT = ' + JSON.stringify(soalAktif) + ';\n// __CONFIG_END__';
-    const newRuntimeConfigBlock = '// __RUNTIME_CONFIG_START__\nlet configDurasi = parseInt(localStorage.getItem(\'configDurasi\') || \'' + configDurasi + '\');\nlet configJumlahSoal = parseInt(localStorage.getItem(\'configJumlahSoal\') || \'' + configJumlahSoal + '\');\nlet configAcak = localStorage.getItem(\'configAcak\') === \'' + configAcak + '\';\nlet configAcakOpsi = localStorage.getItem(\'configAcakOpsi\') === \'' + configAcakOpsi + '\';\nlet configMaxPelanggaran = parseInt(localStorage.getItem(\'configMaxPelanggaran\') || \'' + configMaxPelanggaran + '\');\n// __RUNTIME_CONFIG_END__';
+    const newRuntimeConfigBlock = '// __RUNTIME_CONFIG_START__\nlet configDurasi = parseInt(localStorage.getItem(\'configDurasi\') || \'' + configDurasi + '\');\nlet configJumlahSoal = parseInt(localStorage.getItem(\'configJumlahSoal\') || \'' + configJumlahSoal + '\');\nlet configAcak = localStorage.getItem(\'configAcak\') === \'' + configAcak + '\';\nlet configAcakOpsi = localStorage.getItem(\'configAcakOpsi\') === \'' + configAcakOpsi + '\';\nlet configMaxPelanggaran = parseInt(localStorage.getItem(\'configMaxPelanggaran\') || \'' + configMaxPelanggaran + '\');\nlet configNilaiMaksimal = parseInt(localStorage.getItem(\'configNilaiMaksimal\') || \'' + configNilaiMaksimal + '\');\nlet configNilaiKKM = parseInt(localStorage.getItem(\'configNilaiKKM\') || \'' + configNilaiKKM + '\');\nlet configTampilNilai = localStorage.getItem(\'configTampilNilai\') !== \'false\';\n// __RUNTIME_CONFIG_END__';
     html = html.replace(/\/\/ __CONFIG_START__[\s\S]*?\/\/ __CONFIG_END__/, newConfigBlock);
     html = html.replace(/\/\/ __RUNTIME_CONFIG_START__[\s\S]*?\/\/ __RUNTIME_CONFIG_END__/, newRuntimeConfigBlock);
     html = html.replace(/const HTML_VERSION = "[^"]*";/, 'const HTML_VERSION = "' + newVersion + '";');
@@ -1339,7 +1410,7 @@ async function kirimKeGoogleSheet(payload, customUrl) {
 function submitUjian(isAutoSubmit) {
   clearInterval(timerInterval); let benar = 0;
   soalUrutan.forEach(soalIdx => { if (jawaban[soalIdx] == soalAktif[soalIdx].a) benar++; });
-  const nilai = Math.round((benar / soalUrutan.length) * 100);
+  const nilai = Math.round((benar / soalUrutan.length) * configNilaiMaksimal);
   const waktuSelesaiStr = new Date().toLocaleString('id-ID');
   statusUjian = 'selesai'; localStorage.setItem('statusUjian', statusUjian); localStorage.setItem('nilai', nilai); localStorage.setItem('benar', benar);
   localStorage.setItem('autoSubmit', isAutoSubmit); localStorage.setItem('waktuSelesai', waktuSelesaiStr);
@@ -1347,11 +1418,15 @@ function submitUjian(isAutoSubmit) {
   tampilkanHasil(nilai, benar, isAutoSubmit);
 
   if (configGoogleSheetUrl && dataSiswa) {
+    const isLulus = nilai >= configNilaiKKM;
     const payload = {
       nama: dataSiswa.nama,
       nomor: dataSiswa.nomor,
       kelas: dataSiswa.kelas,
       nilai: nilai,
+      nilaiMaksimal: configNilaiMaksimal,
+      kkm: configNilaiKKM,
+      statusKelulusan: isLulus ? "TUNTAS" : "BELUM TUNTAS",
       benar: benar,
       totalSoal: soalUrutan.length,
       pelanggaran: jumlahPelanggaran,
@@ -1369,7 +1444,20 @@ function tampilkanHasil(nilai, benar, isAutoSubmit) {
   let violationListHtml = '';
   if (pelanggaran.length > 0) violationListHtml = '<div class="violation-list"><h3>📋 Riwayat Pelanggaran:</h3><ul>' + pelanggaran.map(p => '<li><strong>Ke-' + p.no + '</strong> (' + p.waktu + '): ' + p.jenis + '</li>').join('') + '</ul></div>';
   const forensik = hitungForensik(), forensikHtml = renderForensik(forensik), waktuSelesai = localStorage.getItem('waktuSelesai') || '-';
-  document.getElementById('resultArea').innerHTML = '<div class="' + resultClass + '"><h2>' + titleText + '</h2><p><strong>Nama:</strong> ' + dataSiswa.nama + '</p><p><strong>Nomor:</strong> ' + dataSiswa.nomor + '</p><p><strong>Kelas:</strong> ' + dataSiswa.kelas + '</p><p style="font-size:12px; color:var(--text-secondary);">Selesai: ' + waktuSelesai + '</p><div class="score">' + nilai + '</div><p>Benar: <strong>' + benar + '</strong> / ' + soalUrutan.length + '</p><p style="margin-top:12px; font-size:16px;"><strong>⚠️ Pelanggaran: <span style="color:#dc2626; font-size:20px;">' + jumlahPelanggaran + '</span> / ' + maxPelanggaranUjian + '</strong></p>' + (isAutoSubmit ? '<p style="color:#991b1b; font-weight:bold; margin-top:8px;">Dikumpulkan otomatis (' + maxPelanggaranUjian + ' pelanggaran)</p>' : '') + '<div id="sheetSendingStatus"></div>' + violationListHtml + forensikHtml + '<div class="locked-box"> <strong>Ujian dikunci.</strong> Hubungi guru untuk reset.</div><button class="btn-reset" style="float:none; margin-top:15px; padding:10px 20px; font-size:14px;" onclick="bukaModalReset()">🔐 Reset (Guru)</button></div>';
+
+  const isLulus = nilai >= configNilaiKKM;
+  const badgeKkmClass = isLulus ? 'status-on' : 'status-off';
+  const badgeKkmText = isLulus ? 'TUNTAS (≥ ' + configNilaiKKM + ')' : 'BELUM TUNTAS (< ' + configNilaiKKM + ')';
+
+  let scoreDisplayHtml = '';
+  if (configTampilNilai) {
+    scoreDisplayHtml = '<div class="score">' + nilai + ' <span style="font-size:16px; font-weight:normal; color:var(--text-secondary);">/ ' + configNilaiMaksimal + '</span></div>' +
+                       '<div style="margin-bottom:12px;"><span class="status-badge ' + badgeKkmClass + '" style="font-size:14px; padding:5px 12px;">Status: ' + badgeKkmText + '</span></div>';
+  } else {
+    scoreDisplayHtml = '<div class="alert-info" style="margin:20px 0; font-size:15px; font-weight:bold;">🔒 Nilai disembunyikan oleh Guru. Hasil ujian Anda telah tersimpan.</div>';
+  }
+
+  document.getElementById('resultArea').innerHTML = '<div class="' + resultClass + '"><h2>' + titleText + '</h2><p><strong>Nama:</strong> ' + dataSiswa.nama + '</p><p><strong>Nomor:</strong> ' + dataSiswa.nomor + '</p><p><strong>Kelas:</strong> ' + dataSiswa.kelas + '</p><p style="font-size:12px; color:var(--text-secondary);">Selesai: ' + waktuSelesai + '</p>' + scoreDisplayHtml + '<p>Benar: <strong>' + benar + '</strong> / ' + soalUrutan.length + '</p><p style="margin-top:12px; font-size:16px;"><strong>⚠️ Pelanggaran: <span style="color:#dc2626; font-size:20px;">' + jumlahPelanggaran + '</span> / ' + maxPelanggaranUjian + '</strong></p>' + (isAutoSubmit ? '<p style="color:#991b1b; font-weight:bold; margin-top:8px;">Dikumpulkan otomatis (' + maxPelanggaranUjian + ' pelanggaran)</p>' : '') + '<div id="sheetSendingStatus"></div>' + violationListHtml + forensikHtml + '<div class="locked-box"> <strong>Ujian dikunci.</strong> Hubungi guru untuk reset.</div><button class="btn-reset" style="float:none; margin-top:15px; padding:10px 20px; font-size:14px;" onclick="bukaModalReset()">🔐 Reset (Guru)</button></div>';
 }
 
 function tutupModal(id) { document.getElementById(id).style.display = 'none'; }
